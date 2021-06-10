@@ -10,7 +10,7 @@ Dim lastRow As Long
 Dim n As Long
 Dim nextRow As Long
 
-Application.ScreenUpdating = True
+Application.ScreenUpdating = False
 
 If Evaluate("ISREF(Summary!A1)") Then
     Worksheets("Summary").Cells.Clear
@@ -35,7 +35,7 @@ For Each wb In ThisWorkbook.Worksheets                                      'Ite
     With wb
       lastRow = .Cells(Rows.Count, 1).End(xlUp).row                               'Row corresponding to last data entry in Column B
       nextRow = summarySheet.Cells(summarySheet.Rows.Count, "A").End(xlUp).row + 1  'The row in summary where the data will be inserted
-      .Range("B2:D" & lastRow).Copy Destination:=summarySheet.Range("A" & nextRow)  'Copy cells from range B2:Bottom Right Corner of Data and paste them on summary starting at A2
+      .Range("B3:D" & lastRow).Copy Destination:=summarySheet.Range("A" & nextRow)  'Copy cells from range B2:Bottom Right Corner of Data and paste them on summary starting at A2
       Application.CutCopyMode = False                                               'Clear the clipboard
     End With
   End If
@@ -59,11 +59,11 @@ With summarySheet
     End If
     row = row + n - 1
   Next row
-  
-  .Columns(4).ClearContents
-  .Range("A2:C" & lastRow).SpecialCells(xlCellTypeBlanks).Delete Shift:=xlUp
-  .Columns(1).Resize(, 3).AutoFit
-  .Activate
+
+  summarySheet.Columns(4).ClearContents
+  summarySheet.Range("A2:C" & lastRow).SpecialCells(xlCellTypeBlanks).Delete Shift:=xlUp
+  summarySheet.Columns(1).Resize(, 3).AutoFit
+  summarySheet.Activate
 
   '__Format Borders__
   'Set to thin Black Borders
