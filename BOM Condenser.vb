@@ -10,38 +10,39 @@ Dim lastRow As Long
 Dim n As Long
 Dim nextRow As Long
 
-Application.ScreenUpdating = False
+Application.ScreenUpdating = True
 
 If Evaluate("ISREF(Summary!A1)") Then
     Worksheets("Summary").Cells.Clear
 End If
 
 If Not Evaluate("ISREF(Summary!A1)") Then Worksheets.Add().Name = "Summary"     'If there isnt a summary sheet add one
-Set summarySheet = Sheets("Summary")                                                      'Set the current sheet to the summary sheet
+Set summarySheet = Sheets("Summary")        'Set the current sheet to the summary sheet
 
 
 '__Create the Summary BOM Format__
 With summarySheet
   .UsedRange.Clear
-  With .Cells(1, 1).Resize(, 3)                                 'In the current sheet (1,1), make 3 columns
-    .Value = Array("MFG PART NO", "DESCRIPTION", "QTY")    'Specify column names
-    .Font.Bold = True                                           'Bold Font
+  With .Cells(1, 1).Resize(, 3)     'In the current sheet (1,1), make 3 columns
+    .Value = Array("MFG PART NO", "DESCRIPTION", "QTY")     'Specify column names
+    .Font.Bold = True       'Bold Font
   End With
 End With
 
 '__Stack all existing data in summary sheet__
-For Each wb In ThisWorkbook.Worksheets                                      'Iterate over all worksheets
-  If wb.Name <> "Summary" And wb.Name <> "BOM Template" Then                                              'If the name of a sheet isnt summary
+For Each wb In ThisWorkbook.Worksheets      'Iterate over all worksheets
+  If wb.Name <> "Summary" And wb.Name <> "BOM Template" Then        'If the name of a sheet isnt summary
     With wb
-      lastRow = .Cells(Rows.Count, 1).End(xlUp).row                               'Row corresponding to last data entry in Column B
-      nextRow = summarySheet.Cells(summarySheet.Rows.Count, "A").End(xlUp).row + 1  'The row in summary where the data will be inserted
-      .Range("B3:D" & lastRow).Copy Destination:=summarySheet.Range("A" & nextRow)  'Copy cells from range B2:Bottom Right Corner of Data and paste them on summary starting at A2
-      Application.CutCopyMode = False                                               'Clear the clipboard
+      lastRow = .Cells(Rows.Count, 1).End(xlUp).row     'Row corresponding to last data entry in Column B
+      nextRow = summarySheet.Cells(summarySheet.Rows.Count, "A").End(xlUp).row + 1      'The row in summary where the data will be inserted
+      .Range("B3:D" & lastRow).Copy Destination:=summarySheet.Range("A" & nextRow)      'Copy cells from range B2:Bottom Right Corner of Data and paste them on summary starting at A2
+      Application.CutCopyMode = False       'Clear the clipboard
     End With
   End If
 Next wb 'Move onto the next sheet
 
 '__Combine Data__
+summarySheet.Activate
 With summarySheet
   lastRow = .Cells(Rows.Count, 1).End(xlUp).row   'Last row of data
   .Range("A2:C" & lastRow).Sort key1:=.Range("A2"), order1:=1, key2:=.Range("B2"), order2:=2
@@ -61,9 +62,16 @@ With summarySheet
   Next row
 
   summarySheet.Columns(4).ClearContents
-  summarySheet.Range("A2:C" & lastRow).SpecialCells(xlCellTypeBlanks).Delete Shift:=xlUp
+  
+  'Search for empty rows, If one exists, delete all empty rows
+  lastRow = .Cells(.Rows.Count, "A").End(xlUp).row   'Last row of data
+  For row = 2 To lastRow
+    If IsEmpty(.Range("A" & row).Value) Then        'If theres an empty cell in col A
+        summarySheet.Range("A2:C" & lastRow).SpecialCells(xlCellTypeBlanks).Delete Shift:=xlUp      'Delete all empty rows and shift data up
+    End If
+  Next row
+  
   summarySheet.Columns(1).Resize(, 3).AutoFit
-  summarySheet.Activate
 
   '__Format Borders__
   'Set to thin Black Borders
