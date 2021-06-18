@@ -35,7 +35,9 @@ For Each wb In ThisWorkbook.Worksheets      'Iterate over all worksheets
     With wb
       lastRow = .Cells(Rows.Count, 1).End(xlUp).row     'Row corresponding to last data entry in Column B
       nextRow = summarySheet.Cells(summarySheet.Rows.Count, "A").End(xlUp).row + 1      'The row in summary where the data will be inserted
-      .Range("B3:D" & lastRow).Copy Destination:=summarySheet.Range("A" & nextRow)      'Copy cells from range B2:Bottom Right Corner of Data and paste them on summary starting at A2
+      .Range("B3:D" & lastRow).Copy     'Copy cells from range B2:Bottom Right Corner of Data
+      summarySheet.Range("A" & nextRow).PasteSpecial xlPasteValues      'Paste values on summary starting at A2
+      
       Application.CutCopyMode = False       'Clear the clipboard
     End With
   End If
@@ -93,3 +95,4 @@ End With
 
 Application.ScreenUpdating = True
 End Sub
+
